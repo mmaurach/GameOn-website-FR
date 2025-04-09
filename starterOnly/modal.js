@@ -14,7 +14,8 @@ const formData = document.querySelectorAll(".formData");
 const closeBtn = document.querySelector(".close");
 const modalContent = document.querySelector(".content");
 const form = document.querySelector("form[name='reserve']");
-const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-' ][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
+const nameRegex =
+  /^(?=(?:.*[A-Za-zÀ-ÖØ-öø-ÿ]){2,})[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-' ][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
 const firstName = document.getElementById("first");
 const lastName = document.getElementById("last");
 const email = document.getElementById("email");
@@ -52,6 +53,8 @@ function closeModal() {
     // Réinitialiser l’animation pour la prochaine ouverture
     modalContent.style.animation = "modalopen var(--modal-duration) forwards";
     modalContent.removeEventListener("animationend", handleClose);
+    resetFormState();
+    form.reset();
   });
 }
 
@@ -67,6 +70,14 @@ function clearError(input) {
   const formData = input.parentElement;
   formData.removeAttribute("data-error");
   formData.setAttribute("data-error-visible", "false");
+}
+
+// Fonction de reset a la fermeture de la modale
+function resetFormState() {
+  const allInputs = document.querySelectorAll(
+    ".text-control, input[type='radio'], input[type='checkbox'], input[type='date'], input[type='number'], input[type='email']"
+  );
+  allInputs.forEach((input) => clearError(input));
 }
 
 // Fonction de validation pour prénom et nom
