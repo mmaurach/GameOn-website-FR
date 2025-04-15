@@ -101,7 +101,6 @@ img {
   .topnav a.icon {
     float: right;
     display: block;
-    margin-top: -15px;
   }
 }
 
@@ -183,6 +182,18 @@ main {
   position: relative;
   color: #fff;
   padding-top: 10px;
+}
+
+#thanks {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  top: 40%;
+  font-size: 36px;
+  max-width: 275px;
 }
 
 .modal-body {
