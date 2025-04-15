@@ -16,42 +16,56 @@ const modalContent = document.querySelector(".content");
 const form = document.querySelector("form[name='reserve']");
 const firstName = document.getElementById("first");
 const lastName = document.getElementById("last");
+const thanks = document.getElementById("thanks");
+const birthdate = document.getElementById("birthdate");
 
-// launch modal event
-modalBtn.forEach((btn) => btn.addEventListener("click", launchModal));
-
-// launch modal form
+// Fonction d'ouverture de la modale
 function launchModal() {
   modalbg.style.display = "block";
+
+  // Cache le message de remerciement
+  thanks.style.display = "none";
+
+  // Réaffiche les champs
+  let elem = document.getElementsByClassName("formData");
+  for (let i = 0; i < elem.length; i++) {
+    elem[i].style.visibility = "visible";
+  }
+  document.querySelector(".text-label").style.visibility = "visible";
+
+  // Remet le bouton en mode "submit"
+  const btnSubmit = document.querySelector(".btn-submit");
+  btnSubmit.value = "C'est parti";
+  btnSubmit.removeEventListener("click", closeModal); // nettoie l'ancien comportement
 }
 
-// Ferme via la croix
+// Event pour lancer la modale
+modalBtn.forEach((btn) => btn.addEventListener("click", launchModal));
+
+// Fonction de fermerture de la modale
+function closeModal() {
+  modalContent.style.animation = "modalclose var(--modal-duration) forwards";
+
+  const handleClose = () => {
+    modalbg.style.display = "none";
+    modalContent.style.animation = "modalopen var(--modal-duration) forwards";
+    modalContent.removeEventListener("animationend", handleClose);
+    resetFormState();
+    form.reset();
+  };
+
+  modalContent.addEventListener("animationend", handleClose);
+}
+
+// Event pour fermer via la croix
 closeBtn.addEventListener("click", closeModal);
 
-// Ferme en cliquant en dehors de la modale
+// Event pour fermer en dehors de la modale
 modalbg.addEventListener("click", function (e) {
   if (!modalContent.contains(e.target)) {
     closeModal();
   }
 });
-
-// close the modal
-function closeModal() {
-  const modalContent = document.querySelector(".content");
-
-  // Appliquer l'animation de fermeture
-  modalContent.style.animation = "modalclose var(--modal-duration) forwards";
-
-  // Attendre la fin de l'animation avant de masquer la modale
-  modalContent.addEventListener("animationend", function handleClose() {
-    modalbg.style.display = "none";
-    // Réinitialiser l’animation pour la prochaine ouverture
-    modalContent.style.animation = "modalopen var(--modal-duration) forwards";
-    modalContent.removeEventListener("animationend", handleClose);
-    resetFormState();
-    form.reset();
-  });
-}
 
 // Fonction d'affichage des erreurs
 function showError(input, message) {
@@ -78,9 +92,11 @@ function resetFormState() {
 // Fonction de validation pour prénom et nom
 function validateName(input, fieldName) {
   if (!input.value.trim()) {
+    // Ajout du trim pour ne pas prendre en compte les espaces au debut et a la fin
     showError(input, `Le champ ${fieldName} est requis.`);
     return false;
   }
+  // RegEx acceptant les noms et prenoms composés
   const nameRegex =
     /^(?=(?:.*[A-Za-zÀ-ÖØ-öø-ÿ]){2,})[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[-' ][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
 
@@ -105,6 +121,39 @@ function validateEmail(input) {
   }
 }
 
+// Fonction pour valider la date de naissance
+function validateBirthdate() {
+  const birthdateInput = document.getElementById("birthdate");
+  const birthdateValue = birthdateInput.value;
+
+  if (!birthdateValue) {
+    showError(birthdateInput, "Veuillez renseigner votre date de naissance.");
+    return false;
+  }
+
+  const birthDate = new Date(birthdateValue); // Valeur du champ rentré dans la date
+  const today = new Date(); // Date actuelle
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  // Vérifie si la personne a bien 18 ans
+  const is18 =
+    age > 18 ||
+    (age === 18 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0)));
+
+  if (!is18) {
+    showError(
+      birthdateInput,
+      "Vous devez avoir au moins 18 ans pour vous inscrire."
+    );
+    return false;
+  }
+
+  clearError(birthdateInput);
+  return true;
+}
+
 // Fonction pour valider le nombre de concours
 function validateQuantity(input) {
   const quantity = document.getElementById("quantity");
@@ -118,7 +167,7 @@ function validateQuantity(input) {
   }
 }
 
-//Fonction pour valider la selection d'une ville
+// Fonction pour valider la selection d'une ville
 function validateLocation() {
   const locationRadios = document.querySelectorAll("input[name='location']");
   let isChecked = false;
@@ -145,7 +194,7 @@ function validateLocation() {
   }
 }
 
-//Fonction pour valider les conditions d'utilisation
+// Fonction pour valider les conditions d'utilisation
 function validateConditions() {
   const checkbox1 = document.getElementById("checkbox1");
   if (!checkbox1.checked) {
@@ -161,6 +210,7 @@ function validateConditions() {
 firstName.addEventListener("input", () => validateName(firstName, "prénom"));
 lastName.addEventListener("input", () => validateName(lastName, "nom"));
 email.addEventListener("change", () => validateEmail(email));
+birthdate.addEventListener("change", validateBirthdate);
 quantity.addEventListener("input", () => validateQuantity(quantity));
 
 // Validation complète avant soumission
@@ -170,6 +220,7 @@ function validateForm() {
     validateName(firstName, "prénom") &&
     validateName(lastName, "nom") &&
     validateEmail(email) &&
+    validateBirthdate() &&
     validateQuantity(quantity) &&
     validateLocation() &&
     validateConditions()
@@ -181,8 +232,24 @@ function validateForm() {
 
 // Empêcher l'envoi du formulaire si invalide
 form.addEventListener("submit", function (event) {
-  if (!validateForm()) {
-    event.preventDefault();
-    //Afficher le message de succes
+  event.preventDefault();
+
+  if (validateForm()) {
+    // Si c'est valide, on cache le formulaire
+    let elem = document.getElementsByClassName("formData");
+    for (let i = 0; i < elem.length; i++) {
+      elem[i].style.visibility = "hidden";
+    }
+    document.querySelector(".text-label").style.visibility = "hidden";
+
+    // Affiche le message de remerciement
+    thanks.style.display = "block";
+
+    // Change le bouton pour "Fermer"
+    const btnSubmit = document.querySelector(".btn-submit");
+    btnSubmit.value = "Fermer";
+
+    // Ajoute un listener pour fermer la modale si on clique sur Fermer
+    btnSubmit.addEventListener("click", closeModal);
   }
 });
