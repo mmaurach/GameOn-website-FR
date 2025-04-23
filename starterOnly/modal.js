@@ -10,33 +10,24 @@ function editNav() {
 // DOM Elements
 const modalbg = document.querySelector(".bground");
 const modalBtn = document.querySelectorAll(".modal-btn");
-const formData = document.querySelectorAll(".formData");
 const closeBtn = document.querySelector(".close");
 const modalContent = document.querySelector(".content");
 const form = document.querySelector("form[name='reserve']");
 const firstName = document.getElementById("first");
 const lastName = document.getElementById("last");
+const email = document.getElementById("email");
+const quantity = document.getElementById("quantity");
 const thanks = document.getElementById("thanks");
 const birthdate = document.getElementById("birthdate");
 
 // Fonction d'ouverture de la modale
 function launchModal() {
+  // Affichage de la modale
   modalbg.style.display = "block";
-
   // Cache le message de remerciement
   thanks.style.display = "none";
-
-  // Réaffiche les champs
-  let elem = document.getElementsByClassName("formData");
-  for (let i = 0; i < elem.length; i++) {
-    elem[i].style.visibility = "visible";
-  }
-  document.querySelector(".text-label").style.visibility = "visible";
-
-  // Remet le bouton en mode "submit"
-  const btnSubmit = document.querySelector(".btn-submit");
-  btnSubmit.value = "C'est parti";
-  btnSubmit.removeEventListener("click", closeModal); // nettoie l'ancien comportement
+  // Réaffiche le form
+  form.style.display = "block";
 }
 
 // Event pour lancer la modale
@@ -110,7 +101,6 @@ function validateName(input, fieldName) {
 
 // Fonction pour valider l'email avec une regex
 function validateEmail(input) {
-  const email = document.getElementById("email");
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailPattern.test(input.value.trim())) {
     showError(input, "Veuillez entrer une adresse email valide.");
@@ -156,7 +146,6 @@ function validateBirthdate() {
 
 // Fonction pour valider le nombre de concours
 function validateQuantity(input) {
-  const quantity = document.getElementById("quantity");
   const value = input.value.trim();
   if (value === "" || isNaN(value) || value < 0) {
     showError(input, "Veuillez entrer un nombre valide.");
@@ -235,21 +224,12 @@ form.addEventListener("submit", function (event) {
   event.preventDefault();
 
   if (validateForm()) {
-    // Si c'est valide, on cache le formulaire
-    let elem = document.getElementsByClassName("formData");
-    for (let i = 0; i < elem.length; i++) {
-      elem[i].style.visibility = "hidden";
-    }
-    document.querySelector(".text-label").style.visibility = "hidden";
-
     // Affiche le message de remerciement
-    thanks.style.display = "block";
-
-    // Change le bouton pour "Fermer"
-    const btnSubmit = document.querySelector(".btn-submit");
-    btnSubmit.value = "Fermer";
-
+    thanks.style.display = "flex";
+    // Si c'est valide, on cache le formulaire
+    form.style.display = "none";
+    const btnClose = document.querySelector(".btnclose");
     // Ajoute un listener pour fermer la modale si on clique sur Fermer
-    btnSubmit.addEventListener("click", closeModal);
+    btnClose.addEventListener("click", closeModal);
   }
 });
